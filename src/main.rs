@@ -1,27 +1,32 @@
 extern crate actix_web;
-use actix_web::{server, App, HttpRequest};
+use actix_web::{server, http, App, HttpRequest};
+use std::cell::Cell;
 
-fn index(_req: &HttpRequest) -> &'static str {
-    // for _num in 1..10000000 {
-    //     println!("Hello world");
-    // }
+struct AppState {
+    counter: Cell<usize>,
+}
 
-    "Hello world"
+// fn index(_req: &HttpRequest) -> &'static str {
+//     // for _num in 1..10000000 {
+//     //     println!("Hello world");
+//     // }
+
+//     "Hello world"
+// }
+
+fn index(req: &HttpRequest<AppState>) -> String {
+    let count = req.state().counter.get() + 1; // <- get count
+    req.state().counter.set(count); // <- store new count in state
+
+    format!("Request number: {}", count) // <- response with count
 }
 
 fn main() {
-    // use std::time::Instant;
-    // let start = Instant::now();
-    
-    let server = server::new(|| App::new().resource("/", |r| r.f(index)))
-    .bind("127.0.0.1:8088")
-    .unwrap();
-
-    // let duration = start.elapsed();
-
-    // println!("Time elapsed: {:?}", duration);
-
-    server.run();
+    server::new(|| {
+    App::with_state(AppState { counter: Cell::new(0) })
+        .resource("/", |r| r.method(http::Method::GET).f(index))}).bind("127.0.0.1:8080")
+        .unwrap()
+        .run()
 }
 
 // fn main() {
