@@ -1,13 +1,22 @@
 extern crate actix_web;
+#[macro_use] extern crate serde_derive;
+
 use actix_web::{server, App, HttpRequest};
+use serde_json;
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Version {
+    version: &'static str
+}
 
 fn index(_req: &HttpRequest) -> &'static str {
     "I'm working fine!!"
 }
 
-fn version(_req: &HttpRequest) -> &'static str {
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-    VERSION
+fn version(_req: &HttpRequest) -> String {
+    let version = Version {version: env!("CARGO_PKG_VERSION")};
+    let serialized_version = serde_json::to_string(&version).unwrap();
+    serialized_version
 }
 
 fn main() {
