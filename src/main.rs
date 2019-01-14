@@ -11,7 +11,6 @@ fn version(_req: &HttpRequest) -> &'static str {
 }
 
 fn main() {
-
     server::new(|| {
         vec![
             App::new()
